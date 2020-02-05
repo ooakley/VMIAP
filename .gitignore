@@ -12,6 +12,7 @@ build/
 develop-eggs/
 dist/
 data/
+.pybiomart.sqlite
 downloads/
 eggs/
 .eggs/
@@ -22,6 +23,7 @@ sdist/
 var/
 wheels/
 pip-wheel-metadata/
+packrat/
 share/python-wheels/
 *.egg-info/
 .installed.cfg
@@ -124,3 +126,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+.Rproj.user
+packrat/lib*/
