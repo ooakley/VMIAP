@@ -5,16 +5,6 @@ Example:
 python assemble_dataset.py
 """
 import pybedtools
-import pandas as pd
-
-
-def check_intersection(x, val_df):
-    if x["name"] in val_df["index"]:
-        x["val_result"] = val_df.loc[x["index"], "val_result"]
-        return x
-    else:
-        x["val_result"] = "untested"
-        return x
 
 
 def main():
@@ -28,16 +18,43 @@ def main():
     total_df = total_iap.to_dataframe()
     val_df = validate_iap.to_dataframe()
 
-    # Adding element ids to validated IAP dataset:
-    column_names = ["chrom1", "start1", "end1", "strand1", "name", "un1",
-                    "un2", "val_result", "chrom2", "start3", "end3",
-                    "element_id", "length1", "strand2", "length2"]
-    val_id_df = validate_iap.intersect(total_iap, wo=True).to_dataframe(
-                   names=column_names)
-    val_id_df = val_id_df.drop(columns=["chrom1", "start1", "end1", "strand1",
-                                        "name", "un1", "un2", "chrom2", "start3",
-                                        "end3", "length1", "strand2", "length2"])
-    val_id_df.loc[:, "element_id"] = val_id_df.loc[:, "element_id"].apply(pd.to_numeric)
+    # Tidying dataframes:
+    val_df = val_df.rename(columns={"name": "strand", "strand": "score",
+                                    "score": "gene", "itemRgb": "val_result"})
+    total_df = total_df.rename(columns={"name": "element_id",
+                                        "score": "length"})
+
+    # Generating column headers:
+    total_names = list(total_df.columns)
+    val_names = list(val_df.columns)
+    val_names = [e + "1" for e in val_names]
+    col_names = []
+    col_names.extend(val_names)
+    col_names.extend(total_names)
+    col_names.extend(["length1"])
+
+    # Assigning element ids to validated IAPs:
+    val_id_df = validate_iap.intersect(
+        total_iap, wo=True).to_dataframe(names=col_names)
+    val_id_df = val_id_df.drop(columns=val_names[:-1])
+
+    # Making the indices identical to element IDs:
+    total_df.index = total_df["element_id"].astype(int).to_list()
+    val_id_df.index = val_id_df["element_id"].astype(int).to_list()
+
+    # Assigning validation status to all autosomal IAPs:
+    total_df["val_result"] = ""
+    for element_id, row in total_df.iterrows():
+        if element_id in val_id_df["element_id"]:
+            total_df.loc[element_id, "val_result"] = val_id_df.loc[
+                element_id, "val_result1"]
+        else:
+            total_df.loc[element_id, "val_result"] = "untested"
+
+    # Printing results & saving to file:
+    print(total_df["val_result"].value_counts())
+    total_df.to_pickle("data/labelled_iaps.pkl")
+
 
 if __name__ == "__main__":
     main()
