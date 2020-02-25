@@ -15,7 +15,7 @@ def download_regulatory_features(bm_data, feat, attr_list, epi_list, chr_list):
     for epigenome in epi_list:
         filename = (feat.replace(" ", "_") + "_" +
                     epigenome.replace(" ", "_") + ".pkl")
-        filepath = "data/biomart_data/" + filename
+        filepath = "data/ensembl_chromatin_data/" + filename
         if os.path.isfile(filepath):
             print(filename + " already downloaded.")
             continue
@@ -37,8 +37,7 @@ def main():
 
     # Defining necessary query lists
     chromosome_list = [str(x) for x in list(range(20)[1:])]
-    feature_list = ["CTCF Binding Site", "Enhancer", "Promoter",
-                    "TF Binding Site"]
+    feature_list = ["Open chromatin"]
     attribute_list = ["chromosome_name", "chromosome_start", "chromosome_end"]
     with open('data/epigenome_list.data', 'rb') as filehandle:
         epigenome_list = pickle.load(filehandle)
