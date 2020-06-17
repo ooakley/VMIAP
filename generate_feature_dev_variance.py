@@ -3,7 +3,7 @@ A script to evaluate feature variance from in the surrounding genomic context of
 intervals.
 
 Example:
-python generate_feature_variance.py --shuffle False
+python generate_feature_dev_variance.py --shuffle False
 """
 import argparse
 import os
@@ -80,7 +80,6 @@ def main():
             tot_str = gen_str + len(epigenome_group)
             epigenome_feature_filtered = [
                 x for x in feature_filtered if x[gen_str+1:tot_str+1] == epigenome_group]
-            print(len(epigenome_feature_filtered))
 
             # Initialising count array:
             count_array = np.zeros((total_df.shape[0], 1))
@@ -103,8 +102,8 @@ def main():
                 count_array = np.concatenate((count_array, counts_instance), axis=1)
 
             # Computing variance over count array:
-            var_array = np.var(count_array, axis=1)
-            mean_array = np.mean(count_array, axis=1)
+            var_array = np.var(count_array[:, 1:], axis=1)
+            mean_array = np.mean(count_array[:, 1:], axis=1)
 
             # Formatting:
             var_series = pd.Series(var_array)
@@ -115,13 +114,15 @@ def main():
             # Assignment:
             column_id = genomic_feature + "_" + epigenome_group
             total_df[column_id + "_variance"] = var_series
+            print(column_id + "_variance:")
+            print(var_series)
             total_df[column_id + "_mean"] = mean_series
 
     # Saving dataframe:
     if args.shuffle:
-        total_df.to_pickle("data/rand_variances.pkl")
+        total_df.to_pickle("data/rand_feature_dev_variance.pkl")
     else:
-        total_df.to_pickle("data/iap_variances.pkl")
+        total_df.to_pickle("data/iap_feature_dev_variance.pkl")
 
 
 if __name__ == "__main__":

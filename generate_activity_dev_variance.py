@@ -3,7 +3,7 @@ A script to evaluate feature variance from in the surrounding genomic context of
 intervals.
 
 Example:
-python generate_activity_variance.py --shuffle False
+python generate_activity_dev_variance.py --shuffle False
 """
 import argparse
 import os
@@ -100,7 +100,6 @@ def main():
 
                 # Initialising count array:
                 count_array = np.zeros((total_df.shape[0], 1))
-                distance_array = np.zeros((total_df.shape[0], 1))
 
                 # Generating & allocating counts:
                 j = 0
@@ -119,17 +118,9 @@ def main():
                     counts_instance = np.expand_dims(counts_instance, 1)
                     count_array = np.concatenate((count_array, counts_instance), axis=1)
 
-                    dist_instance = generate_distances(dataset_bed, interval_bed).to_numpy()
-                    dist_instance = np.expand_dims(dist_instance, 1)
-                    distance_array = np.concatenate((distance_array, dist_instance), axis=1)
-
                 # Computing variance & mean over count array:
                 var_array = np.var(count_array[:, 1:], axis=1)
                 mean_array = np.mean(count_array[:, 1:], axis=1)
-
-                # Computing variance & mean over distance array
-                var_dist_array = np.var(distance_array[:, 1:], axis=1)
-                mean_dist_array = np.mean(distance_array[:, 1:], axis=1)
 
                 # Establishing column id:
                 column_id = genomic_feature + "_" + epigenome_group + \
@@ -144,19 +135,11 @@ def main():
                 total_df[column_id + "_variance"] = var_series
                 total_df[column_id + "_mean"] = mean_series
 
-                # Formatting & assignment of distances:
-                dist_var_series = pd.Series(var_dist_array)
-                dist_var_series.index = total_df["element_id"].astype(int).to_list()
-                dist_mean_series = pd.Series(mean_dist_array)
-                dist_mean_series.index = total_df["element_id"].astype(int).to_list()
-                total_df[column_id + "_dist_variance"] = dist_var_series
-                total_df[column_id + "_dist_mean"] = dist_mean_series
-
     # Saving dataframe:
     if args.shuffle:
-        total_df.to_pickle("data/rand_activity_variances.pkl")
+        total_df.to_pickle("data/rand_activity_dev_variance.pkl")
     else:
-        total_df.to_pickle("data/activity_features.pkl")
+        total_df.to_pickle("data/iap_activity_dev_variance.pkl")
 
 
 if __name__ == "__main__":

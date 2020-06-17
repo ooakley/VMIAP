@@ -104,8 +104,8 @@ def main():
                 count_array = np.concatenate((count_array, counts_instance), axis=1)
 
             # Computing variance over count array:
-            var_array = np.var(count_array, axis=1)
-            mean_array = np.mean(count_array, axis=1)
+            var_array = np.var(count_array[:, 1:], axis=1)
+            mean_array = np.mean(count_array[:, 1:], axis=1)
 
             # Formatting & assignment:
             var_series = pd.Series(var_array)
@@ -118,9 +118,9 @@ def main():
 
     # Saving dataframe:
     if args.shuffle:
-        total_df.to_pickle("data/rand_activity_variances.pkl")
+        total_df.to_pickle("data/rand_activity_tissue_variance.pkl")
     else:
-        total_df.to_pickle("data/activity_tissue_variances.pkl")
+        total_df.to_pickle("data/iap_activity_tissue_variance.pkl")
 
 
 if __name__ == "__main__":
